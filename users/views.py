@@ -33,6 +33,7 @@ class RegistrationView(View):
         full_name = request.POST.get('name')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
+        checkbox = request.POST.get('checkbox')
 
         if not validate_email(email):
             messages.add_message(request, messages.ERROR, 'Please provide a valid email')
@@ -59,6 +60,9 @@ class RegistrationView(View):
 
         if password2 != password:
             messages.add_message(request, messages.ERROR, 'Your passwords MUST match')
+            context['has_error'] = True
+        if not checkbox:
+            messages.add_message(request, messages.ERROR, 'You have to agree with the Terms of privacy.')
             context['has_error'] = True
 
         if context['has_error']:
