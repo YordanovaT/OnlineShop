@@ -73,7 +73,7 @@ class RegistrationView(View):
         user.set_password(password)
         user.first_name = full_name
         user.last_name = full_name
-        user.is_active = False
+        user.is_active = True
 
         user.save()
 
@@ -87,3 +87,34 @@ class LoginView(View):
         """ Method used to GET the login page """
 
         return render(request, 'users/login.html')
+
+    def post(self, request):
+        """ Method used for user login """
+
+        context = {'has_error': False,
+                   'data': request.POST
+                   }
+
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        if username == '':
+            messages.add_message(request, messages.ERROR, 'Email is required for user login')
+            context['has_error'] = True
+
+        if password == '':
+            messages.add_message(request, messages.ERROR, 'Password is required for user login')
+            context['has_error'] = True
+
+        user = authenticate(request, username=username, password=password)
+
+        if not user and not context['has_error']:  # Checking if authentication method has failed
+            messages.add_message(request, messages.ERROR, 'Invalid login. Try to login again')
+            context['has_error'] = True
+        if context['has_error']:
+            return render(request, 'users/login.html', status=401, context=context)
+
+        # If there are no errors:
+        login(request, user)
+
+        return redirect('base')
