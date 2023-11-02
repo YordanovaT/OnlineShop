@@ -118,3 +118,12 @@ class LoginView(View):
         login(request, user)
 
         return redirect('base')
+
+
+class LogOutView(View):
+    """Class view that is used for user logout functionality """
+    def get(self, request):
+        """Method for logging user out """
+        logout(request)
+        messages.add_message(request, messages.SUCCESS, ' You successfully logged out.')
+        return redirect('base')
