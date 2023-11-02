@@ -2,6 +2,14 @@
 {% block title %}Online Shop{% endblock %}
 {% block content %}
     <div class="mt-6 px-6 py-12 bg-gray-200 rounded-xl">
+         {% if messages %}
+                    {% for message in messages %}
+                        <div class="p-2 mb-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+                            {{message}}
+                        </div>
+                    {% endfor %}
+              {% endif %}
+
         <h2 class="mb-12 text-2xl text-center">Newest items</h2>
 
         <div class="grid grid-cols-3 gap-3">
