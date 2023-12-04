@@ -1,21 +1,48 @@
 """Django views module for items app"""
 
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import View
 from .models import Item
+from .forms import AddItemForm
 
 
 # Create your views here.
 
 class DetailsView(View):
     """ Class view used for the details functionality """
+
     def get(self, request, pk):
         """ Method used to GET the details page """
         context = {'has errors': False}
         item = get_object_or_404(Item, pk=pk)
         context['item'] = item
 
-        related_items=Item.objects.filter(category=item.category, is_sold=False).exclude(pk=pk)
+        related_items = Item.objects.filter(category=item.category, is_sold=False).exclude(pk=pk)
         context['related_items'] = related_items
 
         return render(request, 'items/details.html', context)
+
+
+@login_required
+def add_item(request):
+    context = {'has errors': False}
+    # check request
+    if request.method == 'POST':
+        form = AddItemForm(request.POST, request.FILES)
+
+        # create the new item object but not save it because the 'created_by' is not set yet
+        if form.is_valid():
+            new_item = form.save(commit=False)
+            new_item.created_by = request.user
+            new_item.save()  # save the item after the 'created_by' field is set
+
+            return redirect('item:detail', pk=new_item.id)
+
+    else:  # the request if GET
+        form = AddItemForm()
+
+    form = AddItemForm()
+    context['form'] = form
+    context['item_title'] = 'New Item'
+    return render(request, 'items/add_item.html', context)
