@@ -12,11 +12,22 @@
         <h2 class="mb-6 text-3xl"> {{item.name}} </h2>
         <p class="text-black-500"><strong> Price: </strong> {{item.price}} </p>
         <p class="text-black-500"><strong> Seller: </strong> {{item.created_by.username}} </p>
+        <p class="text-black-500"><strong> Sold: </strong> {{item.is_sold}} </p>
         <br>
         {% if item.description %}
           <p class="text-black-500"><strong> Description: </strong> <br> {{item.description}} </p>
         {% endif %}
-        <a href="#" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-blue-700 text-white rounded-xl hover:bg-blue-500">Contact Seller</a>
+        {% if request.user == item.created_by %}
+            <div class="mt-6 p-6 bg-white rounded-xl">
+                <p>This is your item.</p>
+                <a class="inline-block mt-6 px-6 py-3 font-semibold text-xl rounded-xl  text-white bg-teal-500 hover:bg-teal-700"
+                   href="{% url 'item:edit' item.id %}"> Edit Item</a>
+                <a class="inline-block mt-6 px-6 py-3 font-semibold text-xl rounded-xl  text-white bg-red-500 hover:bg-red-700"
+                   href="{% url 'item:delete' item.id %}"> Delete Item</a>
+            </div>
+        {% else %}
+          <a href="#" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-blue-700 text-white rounded-xl hover:bg-blue-500">Contact Seller</a>
+        {% endif %}
 
       </div>
 </div>

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import View
 from .models import Item
-from .forms import AddItemForm
+from .forms import AddItemForm, EditItemForm
 
 
 # Create your views here.
@@ -24,8 +24,9 @@ class DetailsView(View):
         return render(request, 'items/details.html', context)
 
 
-@login_required
 def add_item(request):
+    """ Method used to add new items """
+
     context = {'has errors': False}
     # check request
     if request.method == 'POST':
@@ -46,3 +47,37 @@ def add_item(request):
     context['form'] = form
     context['item_title'] = 'New Item'
     return render(request, 'items/add_item.html', context)
+
+
+def edit_item(request, item_id):
+    """ Method used to add new items """
+
+    context = {'has errors': False}
+    item = get_object_or_404(Item, pk=item_id, created_by=request.user)
+    # check request
+    if request.method == 'POST':
+
+        form = EditItemForm(request.POST, request.FILES, instance=item)
+
+        if form.is_valid():
+            context['form'] = form
+            form.save()
+            return redirect('item:detail', pk=item.id)
+
+        context['form'] = form  # not valid form
+
+    else:  # the request if GET
+        form = EditItemForm(instance=item)
+        context['form'] = form
+
+    context['item_title'] = 'Edit Item'
+    return render(request, 'items/add_item.html', context)
+
+
+def delete_item(request, item_id):
+    """ Method used to delete new items """
+
+    item = get_object_or_404(Item, pk=item_id, created_by=request.user)
+    item.delete()
+
+    return redirect('shop:dashboard')
