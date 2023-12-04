@@ -1,0 +1,9 @@
+
+{% autoescape off%}
+
+      Hello {{user.username}}. Thank you for registering to our site.
+      In order to verify your account, please click on the link bellow.
+
+       http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+{% endautoescape %}

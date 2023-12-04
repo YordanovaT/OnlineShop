@@ -128,6 +128,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Setting needed in order to be able to send emails via Google
+# See https://www.youtube.com/watch?v=6ANKk9NQ3GI for more information how to enable that option in your account
+
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_HOST_USER='place-for-your-email'
+EMAIL_HOST_PASSWORD='place-for-your-application-pass'
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+
 # Configuration for needed for the proper visualisation of the base page
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'base'
