@@ -4,9 +4,17 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError
+from django.core.mail import EmailMessage
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from validate_email import validate_email
+from .utils import token_generator
 
 # Create your views here.
 
@@ -77,8 +85,55 @@ class RegistrationView(View):
 
         user.save()
 
+        # Creating link
+
+        current_site = get_current_site(request)  # Get the site's domain
+        email_subject = 'Activate your account'
+
+        message = render_to_string('users/activate_profile.html',
+                                   {'user': user, 'domain': current_site.domain,
+                                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                                    # encode user id as bytes
+                                    'token': token_generator.make_token(user)
+                                    # Can use it also for account activation
+                                    })
+        send_email = EmailMessage(
+            email_subject,
+            message,
+            settings.EMAIL_HOST_USER,
+            [email])
+
+        send_email.send()
+
+        messages.add_message(request, messages.SUCCESS,
+                             'Account successfully created! A confirmation email has been sent to you.')
+
         return redirect('login')
 
+class ActivateAccountView(View):
+    """Class view that is used for user account activation """
+
+    def get(self, request, uidb64, token):
+        """
+            Check if the parameters are correct
+            in order to successfully verify account through link
+         """
+
+        try:
+            user_id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=user_id)
+        except Exception as identifier:  # pylint: disable=broad-exception-caught, unused-variable
+            user = None
+
+        if user is not None and token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+
+            messages.add_message(request, messages.SUCCESS,
+                                 ' You successfully activated your account.')
+
+            return redirect('login')
+        return render(request, 'users/activation_failed.html', status=401)
 
 class LoginView(View):
     """Class used for user login"""
