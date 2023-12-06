@@ -30,3 +30,13 @@ class IndexView(View):
         context['categories'] = categories
 
         return render(request, 'users/base.html', context)
+
+
+class DashboardView(View):
+    """ Class view used for the index page """
+    def get(self, request):
+        context={}
+        items= Item.objects.filter(created_by=request.user)
+
+        context['items']=items
+        return render(request, 'online_shop/dashboard.html', context)
