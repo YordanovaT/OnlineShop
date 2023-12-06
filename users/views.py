@@ -16,6 +16,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from validate_email import validate_email
 from .utils import token_generator
 
+
 # Create your views here.
 
 
@@ -110,6 +111,7 @@ class RegistrationView(View):
 
         return redirect('login')
 
+
 class ActivateAccountView(View):
     """Class view that is used for user account activation """
 
@@ -134,6 +136,7 @@ class ActivateAccountView(View):
 
             return redirect('login')
         return render(request, 'users/activation_failed.html', status=401)
+
 
 class LoginView(View):
     """Class used for user login"""
@@ -172,13 +175,130 @@ class LoginView(View):
         # If there are no errors:
         login(request, user)
 
-        return redirect('base')
+        return redirect('shop:base')
 
 
 class LogOutView(View):
     """Class view that is used for user logout functionality """
+
     def get(self, request):
         """Method for logging user out """
         logout(request)
         messages.add_message(request, messages.SUCCESS, ' You successfully logged out.')
-        return redirect('base')
+        return redirect('shop:base')
+
+
+class RessetUserPasswordRequest(View):
+    """Class view that is used for sending users link for resetting password """
+
+    def get(self, request):
+        """ Method used to GET the request email for password reset """
+
+        return render(request, 'users/request_reset.html')
+
+    def post(self, request):
+        """ Method used send email for password resetting """
+
+        context = {'has_error': False}
+        email = request.POST['email']
+
+        # check to see if there is a user with the provided email
+
+        if not validate_email(email):
+            messages.add_message(request, messages.ERROR, 'Please, enter valid email.')
+            context['has_error'] = True
+
+            return render(request, 'users/request_reset.html')
+
+        # check to see if there is a user with the provided email
+        user = User.objects.filter(email=email)
+
+        if user.exists():  # send email only to users who have an account
+            # Creating link
+
+            current_site = get_current_site(request)  # Get the site's domain
+            email_subject = 'Resset your password'
+            message = render_to_string('users/reset_password_text.html',
+                                       {'domain': current_site.domain,
+                                        'uid': urlsafe_base64_encode(force_bytes(user[0].pk)),
+                                        'token': PasswordResetTokenGenerator().make_token(user[0])
+                                        # Can use it also for account activation
+                                        })  # encode user id as bytes
+
+            send_email = EmailMessage(
+                email_subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [email])
+
+            send_email.send()
+
+            messages.add_message(request, messages.SUCCESS,
+                                 'We have sent an email with instructions on how to reset you password.')
+        if context['has_error']:
+            return render(request, 'users/request_reset.html',
+                          status=401, context=context)
+
+        return render(request, 'users/request_reset.html')
+
+
+class UserSetNewPass(View):
+    """Class view that is used for resetting password functionality """
+
+    def get(self, request, uidb64, token):
+        """ Method used to GET the reset password page """
+
+        context = {'uidb64': uidb64,
+                   'token': token
+                   }
+        try:
+            user_id = force_str(urlsafe_base64_decode(uidb64))
+
+            user = User.objects.get(pk=user_id)
+
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                messages.info(request,
+                              'Password reset link is has expired. Please, request a new one.')
+
+                return render(request, 'users/request_reset.html')
+
+        except DjangoUnicodeDecodeError as identifier:
+            messages.add_message(request, messages.ERROR, 'Invalid link')
+            return render(request, 'users/request_reset.html')
+
+        return render(request, 'users/set_new_password.html', context)
+
+    def post(self, request, uidb64, token):
+        """ Method used to reset user's password """
+
+        context = {'uidb64': uidb64,
+                   'token': token,
+                   'has_error': False
+                   }
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+
+        if len(password) < 6:
+            messages.add_message(request, messages.ERROR,
+                                 'Your password must be more than 6 characters')
+            context['has_error'] = True
+
+        if password2 != password:
+            messages.add_message(request, messages.ERROR, 'Your passwords MUST match')
+            context['has_error'] = True
+
+        try:
+            user_id = force_str(urlsafe_base64_decode(uidb64))
+
+            user = User.objects.get(pk=user_id)
+            user.set_password(password)
+            user.save()
+
+            messages.add_message(request, messages.SUCCESS,
+                                 'You have successfully reset your password! You can login with the new password.')
+
+            return redirect('login')
+
+        except DjangoUnicodeDecodeError as identifier:  # pylint: disable=unused-variable
+            messages.add_message(request, messages.ERROR, 'Something went wrong')
+            return render(request, 'users/set_new_password.html', context)

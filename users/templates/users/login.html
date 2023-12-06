@@ -30,10 +30,20 @@
             </div>
         </form>
         <div class="mt-4 form-group mb-3" align="center">
-                <p class="px-10 py-1 text-black-500 text-lg font-semibold">Do not have an account? Create one
+                <p class="px-10 py-1 text-black-500 text-lg font-semibold">Do not have an account? Create one.
                     <a href="{% url 'register' %}" class="btn p-3 px-20 py-1 text-lg bg-blue-700 hover:bg-blue-500 rounded-xl text-white text-center">
                         Register
-                </a></p>
+                    </a>
+                </p>
+
+                <br>
+
+                <p class="px-10 py-1 text-black-500 text-lg font-semibold">Forgot your password? Reset it.
+                    <a href="{% url 'request-reset-password' %}">
+                    <button  class="p-3 px-10 py-1 text-lg bg-blue-700 hover:bg-blue-500 rounded-xl text-white text-center">Password reset </button>
+                    </a>
+                </p>
+
         </div>
     </div>
 
