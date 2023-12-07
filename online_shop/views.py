@@ -88,8 +88,6 @@ def new_conversation(request, item_id):
 def inbox(request):
     """ View used for showing all conversation messages received """
     conversations = Conversation.objects.filter(members__in=[request.user.id])
-    #conversation=Conversation.members.all()
-
     context={'conversations': conversations}
 
     return render(request, 'online_shop/inbox.html', context)
