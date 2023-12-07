@@ -1,0 +1,37 @@
+{% extends 'users/index.html' %}
+{%load static%}
+{% block title %}Requesting email for password reset{% endblock %}
+{% block content %}
+    <div class="w-1/2 my-6 mx-auto p-6 bg-gray-200 rounded=xl">
+        <h3 class="mb-6 text-2xl text-center font-semibold"> Please, provide your email in order to receive instructions</h3>
+        {% if messages %}
+                {% for message in messages %}
+                    <div class="p-2 mb-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+                        {{message}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        <form action="{% url 'request-reset-password' %}" method="post" >
+
+            {% csrf_token %}
+
+            <div class="form-group mb-3">
+                <div class="form-group mb-3">
+
+                    <label class="inline=block mb-2 font-semibold">Email</label>
+                    <input class="w-full px-10 py-1 form-control rounded-lg" type="email" name="email" value="{{data.email}}" placeholder="Email">
+                </div>
+            </div>
+
+            <button class=" w-full px-10 py-1 mt-2 text-lg bg-blue-700 hover:bg-blue-500 rounded-xl text-white">Submit</button>
+        </form>
+        <br>
+        <div align="center">
+            <div class="form-group mb-3">
+                <p class="text-black-500 font-semibold">Already have an account? <a href="{% url 'login' %}">
+                    <button  class="p-3 px-10 py-1 text-lg bg-blue-700 hover:bg-blue-500 rounded-xl text-white text-center">Log in </button>
+                </a></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
