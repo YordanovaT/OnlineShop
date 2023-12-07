@@ -31,13 +31,14 @@
 
       </div>
 </div>
+{% if related_items %}
 <div class="mt-6 px-6 py-12 bg-gray-200 rounded-xl">
          <h2 class="mb-12 text-2xl text-center">Related Items</h2>
 
         <div class="grid grid-cols-3 gap-3">
             {% for item in related_items %}
                 <div>
-                    <a href="#">
+                    <a href="{% url 'item:detail' item.id %}">
                         <div>
                             <img src="{{ item.image.url }}" class="rounded-t-xl">
                         </div>
@@ -49,5 +50,6 @@
                 </div>
             {% endfor %}
         </div>
-    </div>
+</div>
+{% endif %}
 {% endblock %}
