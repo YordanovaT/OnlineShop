@@ -1,8 +1,11 @@
 """Django views module for online_shop app"""
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.views.generic import View
 from items.models import Category, Item
+from .models import Conversation
+from .forms import ConversationMessageForm
 
 
 # Create your views here.
@@ -40,3 +43,53 @@ class DashboardView(View):
 
         context['items']=items
         return render(request, 'online_shop/dashboard.html', context)
+
+
+def new_conversation(request, item_id):
+    """ View used for starting conversation with seller regarding an item """
+    context = {}
+
+    item=get_object_or_404(Item, pk=item_id)
+
+    if item.created_by == request.user:
+        return render(request, 'online_shop/new_conversation.html', context, status=400)
+
+    # all converstions the user is member of
+    conversation=Conversation.objects.filter(item=item).filter(members__in=[request.user.id])
+
+    if conversation: # if there are conversations
+        pass # redirect
+    if request.method == 'POST':
+
+        form=ConversationMessageForm(request.POST)
+
+        if form.is_valid():
+            conversation=Conversation.objects.create(item=item)
+            conversation.members.add(request.user)
+            conversation.members.add(item.created_by)
+            conversation.save()
+
+            conversation_message=form.save(commit=False)
+            conversation_message.conversation=conversation
+            conversation_message.created_by=request.user
+            conversation_message.save()
+            context['form'] = form
+
+            messages.add_message(request, messages.SUCCESS,
+                                 ' You successfully sent message.')
+
+            return  redirect('item:detail', pk=item_id)
+    else:
+         form=ConversationMessageForm()
+
+    return render(request, 'online_shop/new_conversation.html', context)
+
+
+def inbox(request):
+    """ View used for showing all conversation messages received """
+    conversations = Conversation.objects.filter(members__in=[request.user.id])
+    #conversation=Conversation.members.all()
+
+    context={'conversations': conversations}
+
+    return render(request, 'online_shop/inbox.html', context)
