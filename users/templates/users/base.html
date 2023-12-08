@@ -35,11 +35,11 @@
         <div class="grid grid-cols-3 gap-3">
             {% for category in categories %}
                 <div>
-                    <a href="#">
+                    <a href="{% url 'item:browse_by_category' %}?category={{category.name}}">
                         <div>
                             <img src="{{ item.image.url }}" class="rounded-t-xl">
                         </div>
-                        <div class="p-6 bg-white rounded-b-xl">
+                        <div class="p-6 bg-white rounded-b-xl  hover:bg-gray-300">
                             <h2 class="text-2xl">{{ category.name }}</h2>
                             <p class="text-black-300">{{category.items.count}} items </p>
                         </div>
