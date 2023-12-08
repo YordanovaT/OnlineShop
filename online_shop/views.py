@@ -37,11 +37,12 @@ class IndexView(View):
 
 class DashboardView(View):
     """ Class view used for the index page """
-    def get(self, request):
-        context={}
-        items= Item.objects.filter(created_by=request.user)
 
-        context['items']=items
+    def get(self, request):
+        context = {}
+        items = Item.objects.filter(created_by=request.user)
+
+        context['items'] = items
         return render(request, 'online_shop/dashboard.html', context)
 
 
@@ -49,45 +50,70 @@ def new_conversation(request, item_id):
     """ View used for starting conversation with seller regarding an item """
     context = {}
 
-    item=get_object_or_404(Item, pk=item_id)
+    item = get_object_or_404(Item, pk=item_id)
 
     if item.created_by == request.user:
         return render(request, 'online_shop/new_conversation.html', context, status=400)
 
-    # all converstions the user is member of
-    conversation=Conversation.objects.filter(item=item).filter(members__in=[request.user.id])
+    # all conversions the user is member of
+    conversation = Conversation.objects.filter(item=item).filter(members__in=[request.user.id])
 
-    if conversation: # if there are conversations
-        pass # redirect
+    if conversation:  # if there are conversations
+        return redirect('shop:detail', pk=conversation.first().id)
     if request.method == 'POST':
 
-        form=ConversationMessageForm(request.POST)
+        form = ConversationMessageForm(request.POST)
 
         if form.is_valid():
-            conversation=Conversation.objects.create(item=item)
+            conversation = Conversation.objects.create(item=item)
             conversation.members.add(request.user)
             conversation.members.add(item.created_by)
             conversation.save()
 
-            conversation_message=form.save(commit=False)
-            conversation_message.conversation=conversation
-            conversation_message.created_by=request.user
+            conversation_message = form.save(commit=False)
+            conversation_message.conversation = conversation
+            conversation_message.created_by = request.user
             conversation_message.save()
-            context['form'] = form
 
             messages.add_message(request, messages.SUCCESS,
                                  ' You successfully sent message.')
 
-            return  redirect('item:detail', pk=item_id)
+            return redirect('item:detail', pk=item_id)
     else:
-         form=ConversationMessageForm()
-
+        form = ConversationMessageForm()
+    context['form'] = form
     return render(request, 'online_shop/new_conversation.html', context)
 
 
 def inbox(request):
     """ View used for showing all conversation messages received """
     conversations = Conversation.objects.filter(members__in=[request.user.id])
-    context={'conversations': conversations}
+    context = {'conversations': conversations}
 
     return render(request, 'online_shop/inbox.html', context)
+
+
+def conversation_detail(request, pk):
+    """ View used for showing conversation details """
+
+    conversation = Conversation.objects.filter(members__in=[request.user.id]).get(pk=pk)
+
+    context = {'conversation': conversation}
+    if request.method == 'POST':
+
+        form = ConversationMessageForm(request.POST)
+
+        if form.is_valid():
+
+            conversation_message = form.save(commit=False)
+            conversation_message.conversation = conversation
+            conversation_message.created_by = request.user
+            conversation_message.save()
+
+            conversation.save()
+
+            return redirect('shop:detail', pk=pk)
+    else:
+        form = ConversationMessageForm()
+    context['form'] = form
+    return render(request, 'online_shop/detail.html', context)
