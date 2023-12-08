@@ -102,3 +102,19 @@ def browse_items(request):
     return render(request, 'items/browse.html', {'categories': categories, 'items_found': items_found,
                                                  'query': query, 'category_id': category_id
                                                  })
+
+
+def list_items_by_category(request):
+    """View used for listing items by category"""
+
+    context = {}
+    category = request.GET.get('category', '')
+    context['category_id'] = category
+
+    categories = Category.objects.all()
+    context['categories'] = categories
+
+    items_found = Item.objects.filter(is_sold=False, category__name=category)
+    context['items_found'] = items_found
+
+    return render(request, 'items/list_by_category.html', context)
