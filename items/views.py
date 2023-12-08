@@ -87,18 +87,18 @@ def browse_items(request):
     """Method used for searching of items"""
 
     query = request.GET.get('query', '')
-    category_id = request.GET.get('category', 0)
+    category_id = request.GET.get('category', '')
 
     categories = Category.objects.all()
 
     items_found = Item.objects.filter(is_sold=False)
 
     if category_id:  # the user attempts to search for an item
-        items_found = items_found.filter(category_id=category_id)
+        items_found = items_found.filter(category__name=category_id)
 
     if query:  # the user attempts to search for an item
         items_found = Item.objects.filter(name__icontains=query) | Item.objects.filter(description__icontains=query)
 
     return render(request, 'items/browse.html', {'categories': categories, 'items_found': items_found,
-                                                 'query': query, 'category_id': int(category_id)
+                                                 'query': query, 'category_id': category_id
                                                  })
