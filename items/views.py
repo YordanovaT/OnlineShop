@@ -1,6 +1,5 @@
 """Django views module for items app"""
 
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import View
 from .models import Item, Category
@@ -12,13 +11,14 @@ from .forms import AddItemForm, EditItemForm
 class DetailsView(View):
     """ Class view used for the details functionality """
 
-    def get(self, request, pk):
+    def get(self, request, item_id):
         """ Method used to GET the details page """
         context = {'has errors': False}
-        item = get_object_or_404(Item, pk=pk)
+        item = get_object_or_404(Item, pk=item_id)
         context['item'] = item
 
-        related_items = Item.objects.filter(category=item.category, is_sold=False).exclude(pk=pk)
+        related_items = Item.objects.filter(category=item.category, is_sold=False)\
+            .exclude(pk=item_id)  # pylint: disable=E1101
         context['related_items'] = related_items
 
         return render(request, 'items/details.html', context)
@@ -89,19 +89,22 @@ def browse_items(request):
     query = request.GET.get('query', '')
     category_id = request.GET.get('category', '')
 
-    categories = Category.objects.all()
+    categories = Category.objects.all()  # pylint: disable=E1101
 
-    items_found = Item.objects.filter(is_sold=False)
+    items_found = Item.objects.filter(is_sold=False)  # pylint: disable=E1101
 
     if category_id:  # the user attempts to search for an item
         items_found = items_found.filter(category__name=category_id)
 
     if query:  # the user attempts to search for an item
-        items_found = Item.objects.filter(name__icontains=query) | Item.objects.filter(description__icontains=query)
+        # pylint: disable=E1101
+        items_found = Item.objects.filter(name__icontains=query) | \
+                      Item.objects.filter(description__icontains=query)
 
-    return render(request, 'items/browse.html', {'categories': categories, 'items_found': items_found,
-                                                 'query': query, 'category_id': category_id
-                                                 })
+    return render(request, 'items/browse.html',
+                  {'categories': categories, 'items_found': items_found,
+                    'query': query, 'category_id': category_id
+                  })
 
 
 def list_items_by_category(request):
@@ -111,10 +114,10 @@ def list_items_by_category(request):
     category = request.GET.get('category', '')
     context['category_id'] = category
 
-    categories = Category.objects.all()
+    categories = Category.objects.all()  # pylint: disable=E1101
     context['categories'] = categories
 
-    items_found = Item.objects.filter(is_sold=False, category__name=category)
+    items_found = Item.objects.filter(is_sold=False, category__name=category)  # pylint: disable=E1101
     context['items_found'] = items_found
 
     return render(request, 'items/list_by_category.html', context)

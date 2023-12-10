@@ -11,7 +11,7 @@ class Category(models.Model):
     """Model class for the item categories"""
     name = models.CharField(max_length=150)
 
-    class Meta:
+    class Meta:  # pylint: disable=R0903
         """
         Creating class to show categories as plural and to order them by name
         """
@@ -22,7 +22,7 @@ class Category(models.Model):
     def __str__(self):
         """Representing the categories by name, not as objects"""
 
-        return self.name
+        return f' {self.name}'
 
 
 class Item(models.Model):
@@ -40,4 +40,4 @@ class Item(models.Model):
     def __str__(self):
         """Representing the items by name, not as objects"""
 
-        return self.name
+        return f' {self.name}'

@@ -7,7 +7,10 @@ INPUT_CLASSES = 'w-full py-4 px-6 rounded-xl border'
 
 
 class AddItemForm(forms.ModelForm):
-    class Meta:
+    """ Django form class which will be used to add items. """
+    class Meta:  # pylint: disable=R0903
+        """ Django form class which will be used to add items. """
+
         model = Item
         fields = ('category', 'name', 'description', 'image', 'price')
 
@@ -31,7 +34,10 @@ class AddItemForm(forms.ModelForm):
 
 
 class EditItemForm(forms.ModelForm):
-    class Meta:
+    """ Django form class which will be used to edit stations. """
+    class Meta:  # pylint: disable=R0903
+        """ Django form class which will be used to edit stations. """
+
         model = Item
         fields = ('name', 'description', 'image', 'price', 'is_sold')
 
