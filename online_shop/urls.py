@@ -13,5 +13,5 @@ urlpatterns = [
          login_required(views.new_conversation), name='new-conversation'),
     path('inbox/', login_required(views.inbox), name='inbox'),
     path('<int:conv_id>/', login_required(views.conversation_detail), name='detail'),
-    path('', views.IndexView.as_view(), name='base'),
+    path('', views.IndexView.as_view(), name='home'),
 ]

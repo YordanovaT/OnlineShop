@@ -139,6 +139,5 @@ EMAIL_PORT=587
 
 # Configuration for needed for the proper visualisation of the base page
 LOGIN_URL = 'login'
-LOGOUT_REDIRECT_URL = 'base'
 LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = 'base'
+LOGIN_REDIRECT_URL = 'home'
