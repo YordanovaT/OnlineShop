@@ -1,8 +1,8 @@
 """Models for online shop app"""
 
 from django.db import models
-from items.models import Item
 from django.contrib.auth.models import User
+from items.models import Item
 
 
 # Create your models here.
@@ -16,8 +16,8 @@ class Conversation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        """ Metaclass for conversation """
+    class Meta:  # pylint: disable=R0903
+        """ Class used to show the most recent conversations """
 
         ordering = ('-modified_at',)
 
@@ -30,7 +30,8 @@ class Conversation(models.Model):
 class ConversationMessage(models.Model):
     """ Model class for conversation messages """
 
-    conversation = models.ForeignKey(Conversation,  related_name='messages', on_delete=models.CASCADE)
+    conversation = models.ForeignKey(Conversation,
+                                     related_name='messages', on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='created_messages', on_delete=models.CASCADE)

@@ -27,9 +27,9 @@ class IndexView(View):
         """ Method used to GET the index page """
 
         context = {}
-        items = Item.objects.filter(is_sold=False)[0:6]
+        items = Item.objects.filter(is_sold=False)  # pylint: disable=E1101
         context['items'] = items
-        categories = Category.objects.all()
+        categories = Category.objects.all()  # pylint: disable=E1101
         context['categories'] = categories
 
         return render(request, 'users/base.html', context)
@@ -39,8 +39,9 @@ class DashboardView(View):
     """ Class view used for the index page """
 
     def get(self, request):
+        """ Method used to GET the dashboard page """
         context = {}
-        items = Item.objects.filter(created_by=request.user)
+        items = Item.objects.filter(created_by=request.user)  # pylint: disable=E1101
 
         context['items'] = items
         return render(request, 'online_shop/dashboard.html', context)
@@ -56,6 +57,7 @@ def new_conversation(request, item_id):
         return render(request, 'online_shop/new_conversation.html', context, status=400)
 
     # all conversions the user is member of
+    # pylint: disable=E1101
     conversation = Conversation.objects.filter(item=item).filter(members__in=[request.user.id])
 
     if conversation:  # if there are conversations
@@ -87,16 +89,16 @@ def new_conversation(request, item_id):
 
 def inbox(request):
     """ View used for showing all conversation messages received """
-    conversations = Conversation.objects.filter(members__in=[request.user.id])
+    conversations = Conversation.objects.filter(members__in=[request.user.id])  # pylint: disable=E1101
     context = {'conversations': conversations}
 
     return render(request, 'online_shop/inbox.html', context)
 
 
-def conversation_detail(request, pk):
+def conversation_detail(request, conv_id):
     """ View used for showing conversation details """
 
-    conversation = Conversation.objects.filter(members__in=[request.user.id]).get(pk=pk)
+    conversation = Conversation.objects.filter(members__in=[request.user.id]).get(pk=conv_id)  # pylint: disable=E1101
 
     context = {'conversation': conversation}
     if request.method == 'POST':
@@ -112,7 +114,7 @@ def conversation_detail(request, pk):
 
             conversation.save()
 
-            return redirect('shop:detail', pk=pk)
+            return redirect('shop:detail', pk=conv_id)
     else:
         form = ConversationMessageForm()
     context['form'] = form
