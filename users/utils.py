@@ -1,5 +1,5 @@
 """Django utils module"""
-import six
+import six  # pylint: disable=E0401
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 

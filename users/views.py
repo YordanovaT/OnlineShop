@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
-from validate_email import validate_email
+from validate_email import validate_email  # pylint: disable=E0401
 from .utils import token_generator
 
 
@@ -30,7 +30,7 @@ class RegistrationView(View):
 
         return render(request, 'users/register.html')
 
-    def post(self, request):
+    def post(self, request):  # pylint: disable=R0914
         """ Method used for registration """
 
         context = {'has_error': False}
@@ -52,14 +52,14 @@ class RegistrationView(View):
             if User.objects.get(email=email):
                 messages.add_message(request, messages.ERROR, 'Provided email is already taken')
                 context['has_error'] = True
-        except Exception as identifier:  # pylint: disable=broad-exception-caught, unused-variable
+        except Exception as identifier:  # pylint: disable=W0012, W0612, W0703
             pass
 
         try:
             if User.objects.get(username=username):
                 messages.add_message(request, messages.ERROR, 'Username is taken')
                 context['has_error'] = True
-        except Exception as identifier:  # pylint: disable=broad-exception-caught, unused-variable
+        except Exception as identifier:  # pylint: disable=W0012, W0703
             pass
 
         if len(password) < 6:
@@ -71,7 +71,8 @@ class RegistrationView(View):
             messages.add_message(request, messages.ERROR, 'Your passwords MUST match')
             context['has_error'] = True
         if not checkbox:
-            messages.add_message(request, messages.ERROR, 'You have to agree with the Terms of privacy.')
+            messages.add_message(request, messages.ERROR,
+                                 'You have to agree with the Terms of privacy.')
             context['has_error'] = True
 
         if context['has_error']:
@@ -107,7 +108,8 @@ class RegistrationView(View):
         send_email.send()
 
         messages.add_message(request, messages.SUCCESS,
-                             'Account successfully created! A confirmation email has been sent to you.')
+                             'Account successfully created! '
+                             'A confirmation email has been sent to you.')
 
         return redirect('login')
 
@@ -124,7 +126,7 @@ class ActivateAccountView(View):
         try:
             user_id = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=user_id)
-        except Exception as identifier:  # pylint: disable=broad-exception-caught, unused-variable
+        except Exception as identifier:  # pylint: disable=W0012, W0703, W0612
             user = None
 
         if user is not None and token_generator.check_token(user, token):
@@ -175,7 +177,7 @@ class LoginView(View):
         # If there are no errors:
         login(request, user)
 
-        return redirect('shop:base')
+        return redirect('shop:home')
 
 
 class LogOutView(View):
@@ -185,7 +187,7 @@ class LogOutView(View):
         """Method for logging user out """
         logout(request)
         messages.add_message(request, messages.SUCCESS, ' You successfully logged out.')
-        return redirect('shop:base')
+        return redirect('shop:home')
 
 
 class RessetUserPasswordRequest(View):
@@ -234,7 +236,7 @@ class RessetUserPasswordRequest(View):
             send_email.send()
 
             messages.add_message(request, messages.SUCCESS,
-                                 'We have sent an email with instructions on how to reset you password.')
+                                 'We have sent an email with instructions on how to reset you password.')  # pylint: disable=C0301
         if context['has_error']:
             return render(request, 'users/request_reset.html',
                           status=401, context=context)
@@ -262,7 +264,7 @@ class UserSetNewPass(View):
 
                 return render(request, 'users/request_reset.html')
 
-        except DjangoUnicodeDecodeError as identifier:
+        except DjangoUnicodeDecodeError as identifier:  # pylint: disable=W0612
             messages.add_message(request, messages.ERROR, 'Invalid link')
             return render(request, 'users/request_reset.html')
 
@@ -295,7 +297,8 @@ class UserSetNewPass(View):
             user.save()
 
             messages.add_message(request, messages.SUCCESS,
-                                 'You have successfully reset your password! You can login with the new password.')
+                                 'You have successfully reset your password!'
+                                 ' You can login with the new password.')
 
             return redirect('login')
 
