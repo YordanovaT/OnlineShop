@@ -47,11 +47,11 @@ class DashboardView(View):
         return render(request, 'online_shop/dashboard.html', context)
 
 
-def new_conversation(request, item_id):
+def new_conversation(request, pk):  # pylint: disable=C0103
     """ View used for starting conversation with seller regarding an item """
     context = {}
 
-    item = get_object_or_404(Item, pk=item_id)
+    item = get_object_or_404(Item, pk=pk)
 
     if item.created_by == request.user:
         return render(request, 'online_shop/new_conversation.html', context, status=400)
@@ -80,7 +80,7 @@ def new_conversation(request, item_id):
             messages.add_message(request, messages.SUCCESS,
                                  ' You successfully sent message.')
 
-            return redirect('item:detail', pk=item_id)
+            return redirect('item:detail', pk=pk)
     else:
         form = ConversationMessageForm()
     context['form'] = form
@@ -95,10 +95,10 @@ def inbox(request):
     return render(request, 'online_shop/inbox.html', context)
 
 
-def conversation_detail(request, conv_id):
+def conversation_detail(request, pk):  # pylint: disable=C0103
     """ View used for showing conversation details """
 
-    conversation = Conversation.objects.filter(members__in=[request.user.id]).get(pk=conv_id)  # pylint: disable=E1101
+    conversation = Conversation.objects.filter(members__in=[request.user.id]).get(pk=pk)  # pylint: disable=E1101
 
     context = {'conversation': conversation}
     if request.method == 'POST':
@@ -114,7 +114,7 @@ def conversation_detail(request, conv_id):
 
             conversation.save()
 
-            return redirect('shop:detail', pk=conv_id)
+            return redirect('shop:detail', pk=pk)
     else:
         form = ConversationMessageForm()
     context['form'] = form

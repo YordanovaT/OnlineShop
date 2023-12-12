@@ -11,14 +11,14 @@ from .forms import AddItemForm, EditItemForm
 class DetailsView(View):
     """ Class view used for the details functionality """
 
-    def get(self, request, item_id):
+    def get(self, request, pk):  # pylint: disable=C0103
         """ Method used to GET the details page """
         context = {'has errors': False}
-        item = get_object_or_404(Item, pk=item_id)
+        item = get_object_or_404(Item, pk=pk)
         context['item'] = item
 
         related_items = Item.objects.filter(category=item.category, is_sold=False)\
-            .exclude(pk=item_id)  # pylint: disable=E1101
+            .exclude(pk=pk)  # pylint: disable=E1101
         context['related_items'] = related_items
 
         return render(request, 'items/details.html', context)
@@ -49,11 +49,11 @@ def add_item(request):
     return render(request, 'items/add_item.html', context)
 
 
-def edit_item(request, item_id):
+def edit_item(request, pk):  # pylint: disable=C0103
     """ Method used to add new items """
 
     context = {'has errors': False}
-    item = get_object_or_404(Item, pk=item_id, created_by=request.user)
+    item = get_object_or_404(Item, pk=pk, created_by=request.user)
     # check request
     if request.method == 'POST':
 
